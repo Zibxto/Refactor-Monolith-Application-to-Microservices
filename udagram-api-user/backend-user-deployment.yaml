@@ -1,34 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-user
+  name: udagram-api-user
   labels:
-    app: backend-user
+    app: udagram-api-user
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: backend-user
+      app: udagram-api-user
   template:
     metadata:
       labels:
-        app: backend-user
+        app: udagram-api-user
     spec:
       containers:
       - name: udagram-api-user
         image: chris771/udagram-api-user:latest
-        imagePullPolicy: Always
         ports:
         - containerPort: 8080
-        resources:
-          limits:
-            cpu: 500m
-          requests:
-            cpu: 200m
+        envFrom:
+        - configMapRef:
+            name: env-configmap
+        - secretRef:
+            name: env-secret
         livenessProbe:
-          httpGet:
-            path: /health
+          tcpSocket:
             port: 8080
-          initialDelaySeconds: 6
-          periodSeconds: 3
-        
+          initialDelaySeconds: 10
+          periodSeconds: 20
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 20      
+        resources:
+          requests:
+            memory: "1000Mi"
+            cpu: "250m"
+          limits:
+            memory: "2000Mi"
+            cpu: "500m"
